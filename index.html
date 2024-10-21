@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calendar with Tasks</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        .calendar {
+            width: 90%;
+            max-width: 600px;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .calendar-header h2 {
+            margin: 0;
+            font-size: 24px;
+        }
+
+        .calendar-days {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            text-align: center;
+            font-weight: bold;
+            padding: 10px 0;
+            border-bottom: 2px solid #ddd;
+        }
+
+        .calendar-dates {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            text-align: center;
+        }
+
+        .calendar-dates div {
+            padding: 10px;
+            border: 1px solid #ddd;
+            transition: background-color 0.3s; /* Smooth transition for hover */
+        }
+
+        .calendar-dates div:hover {
+            background: #eee;
+            cursor: pointer;
+        }
+
+        .selected-date {
+            background-color: #3700ff;
+            border-radius: 5px;
+        }
+
+        .highlighted-date {
+            background-color:cornflowerblue; /* Highlight color for dates with tasks */
+        }
+
+        .today-date {
+            background-color:#007bff;
+            color: white;
+            border-radius: 5px;
+        }
+
+        .prev-btn, .next-btn, .go-btn ,.home-btn{
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .prev-btn:hover, .next-btn:hover, .go-btn:hover {
+            background: #0056b3;
+        }
+
+        .task-form {
+            margin-top: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            
+        }
+
+        .task-form input, .task-form button {
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+        }
+
+        .task-list {
+            margin-top: 20px;
+            width: 100%;
+            border-top: 2px solid #ddd;
+            padding-top: 10px;
+        }
+
+        .task-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 5px 0;
+        }
+
+        .task-item.completed {
+            text-decoration: line-through;
+            color: #aaa;
+        }
+
+        .checkbox {
+            margin-right: 10px;
+        }
+
+        .date-input {
+            justify-content:center;
+            display: flex;
+            align-items: center;
+            margin-top: 10px;
+        }
+
+        .date-input input {
+            margin-right: 10px;
+            width: 120px;
+        }
+
+        .delete-btn {
+            background: red;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .delete-btn:hover {
+            background: darkred;
+        }
+    </style>
+</head>
+<body>
+    <a href="index.html"><button class="home-btn">Home</button></a>
+    <br>
+    <div class="calendar">
+        <div class="calendar-header">
+            <button class="prev-btn" onclick="changeMonth(-1)">Prev</button>
+            <h2 id="calendar-title">October 2024</h2>
+            <button class="next-btn" onclick="changeMonth(1)">Next</button>
+        </div>
+        <div class="date-input">
+            <input type="date" id="go-to-date" />
+            <button class="go-btn" onclick="goToDate()">Go to Date</button>
+        </div>
+        <div class="calendar-days">
+            <div>Sun</div>
+            <div>Mon</div>
+            <div>Tue</div>
+            <div>Wed</div>
+            <div>Thu</div>
+            <div>Fri</div>
+            <div>Sat</div>
+        </div>
+        <div class="calendar-dates" id="calendar-dates"></div>
+    </div>
+
+    <div class="task-form">
+        <input type="text" id="task-input" placeholder="Enter task" />
+        <button onclick="addTask()">Add Task</button>
+    </div>
+
+    <div class="task-list" id="task-list"></div>
+
+    <script>
+        const tasks = JSON.parse(localStorage.getItem('tasks')) || {}; // Load tasks from Local Storage
+        let currentDate = new Date();
+        let selectedDate = null;
+
+        function renderCalendar() {
+            const month = currentDate.getMonth();
+            const year = currentDate.getFullYear();
+            const firstDay = new Date(year, month, 1);
+            const lastDay = new Date(year, month + 1, 0);
+            const daysInMonth = lastDay.getDate();
+            const calendarDates = document.getElementById('calendar-dates');
+            calendarDates.innerHTML = '';
+
+            // Fill empty cells for the first day of the month
+            for (let i = 0; i < firstDay.getDay(); i++) {
+                calendarDates.innerHTML += '<div></div>';
+            }
+
+            const today = new Date().toISOString().split('T')[0]; // Get today's date in YYYY-MM-DD format
+
+            // Fill the calendar with the days of the month
+            for (let day = 1; day <= daysInMonth; day++) {
+                const dateKey = `${year}-${month + 1}-${day}`;
+                const isSelected = selectedDate && selectedDate === dateKey;
+                const hasTasks = tasks[dateKey] && tasks[dateKey].length > 0; // Check if there are tasks for the date
+                const isToday = dateKey === today; // Check if the date is today
+                
+                calendarDates.innerHTML += `
+                    <div class="${isSelected ? 'selected-date' : ''} ${hasTasks ? 'highlighted-date' : ''} ${isToday ? 'today-date' : ''}" 
+                         onclick="selectDate('${dateKey}')">${day}</div>`;
+            }
+        }
+
+        function changeMonth(direction) {
+            currentDate.setMonth(currentDate.getMonth() + direction);
+            document.getElementById('calendar-title').innerText = currentDate.toLocaleString('default', { month: 'long', year: 'numeric' });
+            renderCalendar();
+        }
+
+        function goToDate() {
+            const inputDate = document.getElementById('go-to-date').value;
+            if (inputDate) {
+                const selected = new Date(inputDate);
+                if (selected) {
+                    currentDate = selected;
+                    document.getElementById('calendar-title').innerText = currentDate.toLocaleString('default', { month: 'long', year: 'numeric' });
+                    renderCalendar();
+                }
+            }
+        }
+
+        function selectDate(dateKey) {
+            selectedDate = dateKey;
+            const taskInput = document.getElementById('task-input');
+            taskInput.setAttribute('data-date', dateKey);
+            taskInput.focus();
+            displayTasks(dateKey);
+            renderCalendar(); // Re-render to apply highlight for selected date
+        }
+
+        function addTask() {
+            const taskInput = document.getElementById('task-input');
+            const task = taskInput.value;
+            const dateKey = taskInput.getAttribute('data-date');
+
+            if (task && dateKey) {
+                if (!tasks[dateKey]) {
+                    tasks[dateKey] = [];
+                }
+                tasks[dateKey].push({ task, completed: false });
+                taskInput.value = '';
+                displayTasks(dateKey);
+                saveTasks(); // Save tasks to Local Storage
+            }
+        }
+
+        function deleteTask(dateKey, index) {
+            tasks[dateKey].splice(index, 1); // Remove task at index
+            if (tasks[dateKey].length === 0) {
+                delete tasks[dateKey]; // Remove date entry if no tasks are left
+            }
+            displayTasks(dateKey);
+            saveTasks(); // Save updated tasks to Local Storage
+            renderCalendar(); // Re-render calendar to update highlights
+        }
+
+        function toggleTaskCompletion(dateKey, index) {
+            tasks[dateKey][index].completed = !tasks[dateKey][index].completed;
+            displayTasks(dateKey);
+            saveTasks(); // Save updated tasks to Local Storage
+        }
+
+        function displayTasks(dateKey) {
+            const taskList = document.getElementById('task-list');
+            taskList.innerHTML = `<h3>Tasks for ${dateKey}:</h3>`;
+
+            if (tasks[dateKey] && tasks[dateKey].length > 0) {
+                tasks[dateKey].forEach((taskObj, index) => {
+                    taskList.innerHTML += `
+                        <div class="task-item ${taskObj.completed ? 'completed' : ''}">
+                            <label>
+                                <input type="checkbox" class="checkbox" onchange="toggleTaskCompletion('${dateKey}', ${index})" ${taskObj.completed ? 'checked' : ''}>
+                                ${taskObj.task}
+                            </label>
+                            <button class="delete-btn" onclick="deleteTask('${dateKey}', ${index})">Delete</button>
+                        </div>`;
+                });
+            } else {
+                taskList.innerHTML += '<div>No tasks for this date.</div>';
+            }
+        }
+
+        function saveTasks() {
+            localStorage.setItem('tasks', JSON.stringify(tasks)); // Save tasks to Local Storage
+        }
+
+        // Initialize the calendar
+        document.getElementById('calendar-title').innerText = currentDate.toLocaleString('default', { month: 'long', year: 'numeric' });
+        renderCalendar();
+    </script>
+</body>
+</html>

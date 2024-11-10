@@ -56,7 +56,7 @@
         .calendar-dates div {
             padding: 10px;
             border: 1px solid #ddd;
-            transition: background-color 0.3s; /* Smooth transition for hover */
+            transition: background-color 0.3s; 
         }
 
         .calendar-dates div:hover {
@@ -70,7 +70,7 @@
         }
 
         .highlighted-date {
-            background-color:cornflowerblue; /* Highlight color for dates with tasks */
+            background-color:cornflowerblue; 
         }
 
         .today-date {
@@ -157,8 +157,6 @@
     </style>
 </head>
 <body>
-    <button  class="home-btn" onclick="goToToday()">Today</button>
-    <br>
     <div class="calendar">
         <div class="calendar-header">
             <button class="prev-btn" onclick="changeMonth(-1)">Prev</button>
@@ -192,12 +190,6 @@
         const tasks = JSON.parse(localStorage.getItem('tasks')) || {}; 
         let currentDate = new Date();
         let selectedDate = null;
-        function goToToday() {
-            currentDate = new Date();  
-            document.getElementById('calendar-title').innerText = currentDate.toLocaleString('default', { month: 'long', year: 'numeric' });
-            renderCalendar();          
-        }
-        
         function renderCalendar() {
             const month = currentDate.getMonth();
             const year = currentDate.getFullYear();

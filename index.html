@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Calendar with Tasks</title>
+    <title>Calendar-APP</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -157,7 +157,7 @@
     </style>
 </head>
 <body>
-    <button  class="home-btn" onclick="goToToday()">Today</button>
+    <button  class="home-btn" onclick="renderCalendar()">Today</button>
     <br>
     <div class="calendar">
         <div class="calendar-header">
@@ -193,12 +193,6 @@
         let currentDate = new Date();
         let selectedDate = null;
 
-
-        function goToToday() {
-             const today = new Date(); 
-            displayDate(today);       
-        }
-
         function renderCalendar() {
             const month = currentDate.getMonth();
             const year = currentDate.getFullYear();
@@ -213,14 +207,14 @@
                 calendarDates.innerHTML += '<div></div>';
             }
 
-            const today = new Date().toISOString().split('T')[0]; // Get today's date in YYYY-MM-DD format
+            const today = new Date().toISOString().split('T')[0]; 
 
             // Fill the calendar with the days of the month
             for (let day = 1; day <= daysInMonth; day++) {
                 const dateKey = `${year}-${month + 1}-${day}`;
                 const isSelected = selectedDate && selectedDate === dateKey;
-                const hasTasks = tasks[dateKey] && tasks[dateKey].length > 0; // Check if there are tasks for the date
-                const isToday = dateKey === today; // Check if the date is today
+                const hasTasks = tasks[dateKey] && tasks[dateKey].length > 0; 
+                const isToday = dateKey === today; 
                 
                 calendarDates.innerHTML += `
                     <div class="${isSelected ? 'selected-date' : ''} ${hasTasks ? 'highlighted-date' : ''} ${isToday ? 'today-date' : ''}" 

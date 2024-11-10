@@ -157,7 +157,7 @@
     </style>
 </head>
 <body>
-    <a href="index.html"><button class="home-btn">Home</button></a>
+    <button  class="home-btn" onclick="goToToday()">Today</button>
     <br>
     <div class="calendar">
         <div class="calendar-header">
@@ -192,6 +192,12 @@
         const tasks = JSON.parse(localStorage.getItem('tasks')) || {}; // Load tasks from Local Storage
         let currentDate = new Date();
         let selectedDate = null;
+
+
+        function goToToday() {
+             const today = new Date(); 
+            displayDate(today);       
+        }
 
         function renderCalendar() {
             const month = currentDate.getMonth();

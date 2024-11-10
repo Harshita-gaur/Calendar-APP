@@ -157,7 +157,7 @@
     </style>
 </head>
 <body>
-    <button  class="home-btn" onclick="renderCalendar()">Today</button>
+    <button  class="home-btn" onclick="goToToday()">Today</button>
     <br>
     <div class="calendar">
         <div class="calendar-header">
@@ -189,10 +189,15 @@
     <div class="task-list" id="task-list"></div>
 
     <script>
-        const tasks = JSON.parse(localStorage.getItem('tasks')) || {}; // Load tasks from Local Storage
+        const tasks = JSON.parse(localStorage.getItem('tasks')) || {}; 
         let currentDate = new Date();
         let selectedDate = null;
-
+        function goToToday() {
+            currentDate = new Date();  
+            document.getElementById('calendar-title').innerText = currentDate.toLocaleString('default', { month: 'long', year: 'numeric' });
+            renderCalendar();          
+        }
+        
         function renderCalendar() {
             const month = currentDate.getMonth();
             const year = currentDate.getFullYear();
@@ -202,14 +207,12 @@
             const calendarDates = document.getElementById('calendar-dates');
             calendarDates.innerHTML = '';
 
-            // Fill empty cells for the first day of the month
             for (let i = 0; i < firstDay.getDay(); i++) {
                 calendarDates.innerHTML += '<div></div>';
             }
 
             const today = new Date().toISOString().split('T')[0]; 
 
-            // Fill the calendar with the days of the month
             for (let day = 1; day <= daysInMonth; day++) {
                 const dateKey = `${year}-${month + 1}-${day}`;
                 const isSelected = selectedDate && selectedDate === dateKey;
@@ -246,7 +249,7 @@
             taskInput.setAttribute('data-date', dateKey);
             taskInput.focus();
             displayTasks(dateKey);
-            renderCalendar(); // Re-render to apply highlight for selected date
+            renderCalendar(); 
         }
 
         function addTask() {
@@ -268,17 +271,17 @@
         function deleteTask(dateKey, index) {
             tasks[dateKey].splice(index, 1); // Remove task at index
             if (tasks[dateKey].length === 0) {
-                delete tasks[dateKey]; // Remove date entry if no tasks are left
+                delete tasks[dateKey]; 
             }
             displayTasks(dateKey);
-            saveTasks(); // Save updated tasks to Local Storage
-            renderCalendar(); // Re-render calendar to update highlights
+            saveTasks(); 
+            renderCalendar(); 
         }
 
         function toggleTaskCompletion(dateKey, index) {
             tasks[dateKey][index].completed = !tasks[dateKey][index].completed;
             displayTasks(dateKey);
-            saveTasks(); // Save updated tasks to Local Storage
+            saveTasks(); 
         }
 
         function displayTasks(dateKey) {
@@ -302,10 +305,9 @@
         }
 
         function saveTasks() {
-            localStorage.setItem('tasks', JSON.stringify(tasks)); // Save tasks to Local Storage
+            localStorage.setItem('tasks', JSON.stringify(tasks)); 
         }
 
-        // Initialize the calendar
         document.getElementById('calendar-title').innerText = currentDate.toLocaleString('default', { month: 'long', year: 'numeric' });
         renderCalendar();
     </script>
